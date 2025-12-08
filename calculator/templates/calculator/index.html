@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice CI/CD Demo</title>
+    <link rel="stylesheet" href="{% static 'calculator/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Calculatrice (CI/CD)</h1>
+
+        <div class="calc-form">
+            <input type="number" id="numA" placeholder="Premier nombre" step="any">
+            <select id="operation">
+                <option value="add">Addition (+)</option>
+                <option value="subtract">Soustraction (-)</option>
+                <option value="multiply">Multiplication (×)</option>
+                <option value="divide">Division (÷)</option>
+            </select>
+            <input type="number" id="numB" placeholder="Deuxième nombre" step="any">
+            <button onclick="calculate()">Calculer</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const a = document.getElementById('numA').value;
+            const b = document.getElementById('numB').value;
+            const operation = document.getElementById('operation').value;
+
+            fetch(`/calculate/?operation=${operation}&a=${a}&b=${b}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.style.display = 'block';
+
+                    if (data.error) {
+                        resultDiv.className = 'error';
+                        resultDiv.innerHTML = `<strong>Erreur:</strong> ${data.error}`;
+                    } else {
+                        resultDiv.className = '';
+                        resultDiv.style.backgroundColor = '#e7f3ff';
+                        resultDiv.innerHTML = `<strong>Résultat:</strong> ${data.a} ${getOperationSymbol(data.operation)} ${data.b} = ${data.result}`;
+                    }
+                })
+                .catch(error => {
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = `<strong>Erreur:</strong> ${error}`;
+                });
+        }
+
+        function getOperationSymbol(operation) {
+            const symbols = {
+                'add': '+',
+                'subtract': '-',
+                'multiply': '×',
+                'divide': '÷'
+            };
+            return symbols[operation] || operation;
+        }
+    </script>
+</body>
+</html>
